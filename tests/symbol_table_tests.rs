@@ -20,4 +20,3 @@ fn test_symbol_table_from_iterable_of_string() -> Result<(), std::io::Error> {
     assert_eq!(1761, symbol_table.len());
     Ok(())
 }
-

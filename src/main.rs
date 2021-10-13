@@ -6,9 +6,11 @@ fn main() {
     let matches = App::new("Binary Disassembly Parser")
         .version("1.0.0")
         .author("Graham Riches")
-        .about("Parses disassembled application binaries into static HTML")
+        .about("Parses disassembled application binaries into static HTML or raw terminal output")
         .args_from_usage(
             "<INPUT>                'The disassembled binary file to parse'
+            -h, --html              'Exports all binary information as static HTML, ignores other options like function size, etc.'
+            -f, --functions         'Show only function size, only valid for terminal output'
             -v, --verbosity=[LEVEL] 'Enables verbose output with optional levels: <0,1,2>'")
         .get_matches();
 
@@ -21,6 +23,4 @@ fn main() {
     bss.sort_by_size_descending();
     print!("{:?}", bss);
     
-
-
 }
