@@ -54,6 +54,25 @@ impl SymbolTable {
         Ok(result)
     }
 
+    /// Creates a symbol table from a vector of lines read
+    /// 
+    /// # Arguments
+    /// * 'lines' - Vector of lines containing the data
+    /// 
+    /// # Examples
+    /// ```ignore
+    /// let lines: Vec<String> = vec!["some symbol table stuff here", "more here"];
+    /// let symbol_table = symbol_table::SymbolTable::from_lines(&lines);
+    /// ```
+    pub fn from_lines(lines: &Vec<String>) -> Self {
+        lines.iter()
+            .map(|x| parse_symbol_table_entry(x))
+            .filter(|x| x.is_ok())
+            .map(|x| x.unwrap())
+            .map(|(_, result)| result)
+            .collect::<SymbolTable>()
+    }
+
     /// Helper function to sort the symbol table by symbol size in an ascending manner
     pub fn sort_by_size_ascending(&mut self) -> () {
         self.0.sort_by(|x, y| {
