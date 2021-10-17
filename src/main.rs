@@ -1,8 +1,9 @@
 extern crate clap;
 extern crate atty;
-use clap::{App};
+use clap::{App, Arg};
 use binarytools::binary_utils::parser::symbol_table::{SymbolTable, SymbolTableEntry, SymbolType};
 use std::io::{self, BufRead};
+
 
 fn main() {
     // Read piped input
@@ -14,15 +15,30 @@ fn main() {
         }
     }    
 
+    // Build up the CLI parsing arguments
     let mut app = App::new("Binary Disassembly Parser")
         .version("1.0.0")
         .author("Graham Riches")
         .about("Parses disassembled application binaries and outputs some formatted data")
-        .args_from_usage(
-            "-i, --input=[FILE]      'The disassembled binary file to parse'
-             -h, --html              'WIP - Exports all binary information as static HTML, ignores other options like function size, etc.'
-             -f, --filter=[TYPE]     'Filter by. Options: objects, functions, files'
-             -v, --verbosity=[LEVEL] 'Enables verbose output with optional levels: <0,1,2>'");
+        .arg(Arg::with_name("input")
+            .short("i")
+            .long("input")
+            .value_name("input")
+            .help("The disassembled binary file to parse")
+            .required(false))
+        .arg(Arg::with_name("filter")
+            .short("f")
+            .long("filter")
+            .value_name("filter")
+            .help("Filter by. Options: objects, functions, files")
+            .required(false))
+        .arg(Arg::with_name("output")
+            .short("o")
+            .long("output")
+            .value_name("output")
+            .help("Choose the output format. Options: terminal (default), html")
+            .required(false)
+            .default_value("terminal"));
 
     let matches = app.clone().get_matches();
 
