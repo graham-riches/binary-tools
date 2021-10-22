@@ -14,6 +14,11 @@ use std::{
     iter::{self, FromIterator},
     path::Path,
 };
+
+use horrorshow::html;
+use horrorshow::prelude::*;
+use horrorshow::helper::doctype;
+
 use crate::string_utils;
 
 #[cfg(test)]
@@ -89,6 +94,56 @@ impl SymbolTable {
                 .partial_cmp(&x.alignment_or_size)
                 .unwrap()
         });
+    }
+
+    /// Converts a symbol table into an HTML formatted string
+    pub fn to_html(&self) -> String {
+        format!("{}", html! {
+            : doctype::HTML;
+            html {
+                head {                
+                    title : "Symbol Table";
+                    style : "table {
+                        font-family: arial, sans-serif;
+                        border-collapse: collapse;
+                    }
+                
+                    td, th {
+                        border: 1px solid #dddddd;
+                        text-align: left;
+                        padding: 8px;
+                    }
+                
+                    tr:nth-child(even) {
+                        background-color: #dddddd;
+                    }";
+                }
+                body {
+                    // attributes
+                    h1(id="heading", class="title") : "Symbol Table Sizes";
+                    table(class="tg") {
+                        thead {
+                            tr {
+                                th: "Name";
+                                th: "Section";
+                                th: "Address";
+                                th: "Size";
+                            }                                          
+                        }
+                        tbody {
+                            @ for i in 0..self.len() {
+                                tr { 
+                                    td: Raw(format!("{}", self[i].name));
+                                    td: Raw(format!("{}", self[i].section));
+                                    td: Raw(format!("{:08x}", self[i].address));
+                                    td: Raw(format!("{}", self[i].alignment_or_size));
+                                }
+                            }
+                        }                    
+                    }
+                }
+            }
+        })
     }
 
     /// Gets the maximum length of all names contained in the symbol table

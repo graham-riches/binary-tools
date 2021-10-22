@@ -1,8 +1,11 @@
-extern crate clap;
-extern crate atty;
-use clap::{App, Arg};
+use std::{fs::File, io::{self, BufRead, Write}};
+
 use binarytools::binary_utils::parser::symbol_table::{SymbolTable, SymbolTableEntry, SymbolType};
-use std::io::{self, BufRead};
+
+extern crate clap;
+use clap::{App, Arg};
+
+extern crate atty;
 
 
 fn main() {
@@ -32,13 +35,12 @@ fn main() {
             .value_name("filter")
             .help("Filter by. Options: objects, functions, files")
             .required(false))
-        .arg(Arg::with_name("output")
+        .arg(Arg::with_name("html")
             .short("o")
-            .long("output")
-            .value_name("output")
-            .help("Choose the output format. Options: terminal (default), html")
-            .required(false)
-            .default_value("terminal"));
+            .long("html")
+            .value_name("html")
+            .help("Write formatted HTML output to a file: --html=filename.html")
+            .required(false));            
 
     let matches = app.clone().get_matches();
 
@@ -65,9 +67,19 @@ fn main() {
     };
 
     // Get the symbol table, filter it, sort it and print it out
-    let mut bss = symbol_table.into_iter()
+    let mut filtered = symbol_table.into_iter()
         .filter(filter)
         .collect::<SymbolTable>();
-    bss.sort_by_size_descending();
-    print!("{:?}", bss);
+    filtered.sort_by_size_descending();
+    print!("{:?}", filtered);
+
+    // Output formatted HTML if requested
+    match matches.value_of("html") {
+        Some(filename) => {
+            let mut object_table = File::create(filename).expect(&format!("Could not create file: {}", filename));
+            write!(object_table, "{}", filtered.to_html()).expect("Could not write to file");
+        }
+        None => ()
+    }
 }
+
