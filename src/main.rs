@@ -1,12 +1,8 @@
 use std::{fs::File, io::{self, BufRead, Write}};
-
 use binarytools::binary_utils::parser::symbol_table::{SymbolTable, SymbolTableEntry, SymbolType};
-
 extern crate clap;
 use clap::{App, Arg};
-
 extern crate atty;
-
 
 fn main() {
     // Read piped input
