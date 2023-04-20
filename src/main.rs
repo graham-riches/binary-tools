@@ -13,8 +13,7 @@ fn main() {
             lines.push(line.unwrap());
         }
     }    
-
-    // Build up the CLI parsing arguments
+    
     let mut app = App::new("Binary Disassembly Parser")
         .version("1.0.0")
         .author("Graham Riches")
@@ -59,8 +58,7 @@ fn main() {
             }
         }
     };
-
-    // Filter the symbol table based on the filter option
+    
     let filter: Option<fn(&SymbolTableEntry) -> bool> = match matches.value_of("filter") {
         Some("objects")   => Some(|x| x.flags.symbol_type == SymbolType::Object),
         Some("functions") => Some(|x| x.flags.symbol_type == SymbolType::Function),
@@ -70,8 +68,7 @@ fn main() {
     };
 
     let mut filtered = SymbolTable::new();
-    if let Some(f) = filter {
-        // Get the symbol table, filter it, sort it and print it out
+    if let Some(f) = filter {        
         filtered = symbol_table.into_iter()
             .filter(f)
             .collect::<SymbolTable>();                
@@ -81,9 +78,7 @@ fn main() {
             .collect::<SymbolTable>();        
     }
     filtered.sort_by_size_descending();
-
-
-    // Output formatted HTML if requested
+    
     match matches.value_of("html") {
         Some(filename) => {
             let mut object_table = File::create(filename).expect(&format!("Could not create file: {}", filename));
