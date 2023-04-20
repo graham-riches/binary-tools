@@ -13,6 +13,7 @@ use std::{
     io,
     iter::{self, FromIterator},
     path::Path,
+    slice
 };
 
 use horrorshow::html;
@@ -34,8 +35,12 @@ impl SymbolTable {
     /// use arm_binary_utils::symbol_table::SymbolTable;
     /// let symbol_table = SymbolTable::new();
     /// ```
-    fn new() -> Self {
+    pub fn new() -> Self {
         SymbolTable(Vec::new())
+    }
+
+    pub fn iter(&self) -> slice::Iter<'_, SymbolTableEntry> {
+        self.0.iter()
     }
 
     /// Creates a symbol table from a file

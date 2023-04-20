@@ -31,6 +31,12 @@ fn main() {
             .value_name("filter")
             .help("Filter by. Options: objects, functions, files")
             .required(false))
+        .arg(Arg::with_name("filter-by-section")
+            .short("s")
+            .long("filter-by-section")
+            .value_name("filter_section")
+            .help("Filter by section (e.g., .text, .bss, etc.)")
+            .required(false))        
         .arg(Arg::with_name("html")
             .short("o")
             .long("html")
@@ -55,19 +61,27 @@ fn main() {
     };
 
     // Filter the symbol table based on the filter option
-    let filter: fn(&SymbolTableEntry) -> bool = match matches.value_of("filter") {
-        Some("objects")   => |x| x.flags.symbol_type == SymbolType::Object,
-        Some("functions") => |x| x.flags.symbol_type == SymbolType::Function,
-        Some("files")     => |x| x.flags.symbol_type == SymbolType::File,
-        _                 => |_| true,        
+    let filter: Option<fn(&SymbolTableEntry) -> bool> = match matches.value_of("filter") {
+        Some("objects")   => Some(|x| x.flags.symbol_type == SymbolType::Object),
+        Some("functions") => Some(|x| x.flags.symbol_type == SymbolType::Function),
+        Some("files")     => Some(|x| x.flags.symbol_type == SymbolType::File),
+        Some(_)           => None,
+        None              => None      
     };
 
-    // Get the symbol table, filter it, sort it and print it out
-    let mut filtered = symbol_table.into_iter()
-        .filter(filter)
-        .collect::<SymbolTable>();
+    let mut filtered = SymbolTable::new();
+    if let Some(f) = filter {
+        // Get the symbol table, filter it, sort it and print it out
+        filtered = symbol_table.into_iter()
+            .filter(f)
+            .collect::<SymbolTable>();                
+    } else if let Some(section) = matches.value_of("filter-by-section") {
+        filtered = symbol_table.into_iter()
+            .filter(|x| x.section == section)
+            .collect::<SymbolTable>();        
+    }
     filtered.sort_by_size_descending();
-    print!("{:?}", filtered);
+
 
     // Output formatted HTML if requested
     match matches.value_of("html") {
@@ -75,7 +89,7 @@ fn main() {
             let mut object_table = File::create(filename).expect(&format!("Could not create file: {}", filename));
             write!(object_table, "{}", filtered.to_html()).expect("Could not write to file");
         }
-        None => ()
+        None => print!("{:?}", filtered)
     }
 }
 
